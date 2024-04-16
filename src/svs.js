@@ -13,7 +13,10 @@ async function downloadValueSet(
   output,
   vsDB = {},
   caching = true,
-  options = { svsCodeSystemType: 'url' }
+  options = { 
+    svsCodeSystemType: 'url',
+    svsCodeSystemCallback: null
+  }
 ) {
   debug(`Getting ValueSet: ${oid}${version != null ? ` version ${version}` : ''}`);
   const params = new URLSearchParams({ id: oid });
@@ -75,6 +78,7 @@ function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url'
       'ns0:Concept'
     ];
 
+  const optionCallback = typeof options.svsCodeSystemType === 'function' ? options.svsCodeSystemType : null;
   // Loop over the codes and build the JSON.
   const codeList = [];
   for (let concept in conceptList) {
@@ -103,7 +107,20 @@ function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url'
       system = systemOid;
     }
 
-    codeList.push({ code, system, version });
+    const codeToAdd = { code, system, version };
+
+    if (optionCallback) {
+      const additionalCodes = optionCallback(codeToAdd);
+
+      if (additionalCodes && Array.isArray(additionalCodes)) {
+        additionalCodes.forEach(additionalCode => {
+          codeList.push(additionalCode);
+        });
+      }
+    }
+
+
+    codeList.push(codeToAdd);
   }
 
   // Format according to the current valueset db JSON.
