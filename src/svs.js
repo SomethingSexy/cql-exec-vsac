@@ -58,7 +58,7 @@ function getVSACCodeSystem(codeSystems, system) {
 // Take in a string containing a string of the XML response from a VSAC SVS
 // response and parse it into a vsDB object.  This code makes strong
 // assumptions about the structure of the message.  See code below.
-function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url' }) {
+function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url', svsCodeSystemCallback: null }) {
   if (typeof xmlString === 'undefined' || xmlString == null || xmlString.trim().length == 0) {
     return;
   }
@@ -78,7 +78,7 @@ function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url'
       'ns0:Concept'
     ];
 
-  const optionCallback = typeof options.svsCodeSystemType === 'function' ? options.svsCodeSystemType : null;
+  const optionCallback = typeof options.svsCodeSystemCallback === 'function' ? options.svsCodeSystemCallback : null;
   // Loop over the codes and build the JSON.
   const codeList = [];
   for (let concept in conceptList) {
