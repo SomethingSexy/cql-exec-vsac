@@ -114,6 +114,7 @@ function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url'
 
       if (additionalCodes && Array.isArray(additionalCodes)) {
         additionalCodes.forEach(additionalCode => {
+          // TODO: handle systemOid here?
           codeList.push(additionalCode);
         });
       }
