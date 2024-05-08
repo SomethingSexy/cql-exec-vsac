@@ -325,10 +325,16 @@ describe('SVS', () => {
           vsDB,
           true,
           {
-            svsCodeSystemCallback: ({ code, system }) => {
-              if (code === '160604004' && system === 'http://snomed.info/sct') {
-                return [{ code, system: 'http://foo.com', version: 'http://foo.com/version/1' }];
-              }
+            //  { code, system, version }
+            svsCodeSystemCallback: (codes) => {
+              const addCodes = [];
+              codes.forEach(code => {
+                if (code.code === '160604004' && code.system === 'http://snomed.info/sct') {
+                  addCodes.push({ code: code.code, system: 'http://foo.com', version: 'http://foo.com/version/1' });
+                }      
+              });
+
+              return codes.concat(addCodes);
             }
           }
         )

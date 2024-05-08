@@ -11,11 +11,6 @@
         },
         {
           "code": "160604004",
-          "system": "http://foo.com",
-          "version": "http://foo.com/version/1"
-        },
-        {
-          "code": "160604004",
           "system": "http://snomed.info/sct",
           "version": "http://snomed.info/sct/731000124108/version/20230901"
         },
@@ -138,6 +133,11 @@
           "code": "82302008",
           "system": "http://snomed.info/sct",
           "version": "http://snomed.info/sct/731000124108/version/20230901"
+        },
+        {
+          "code": "160604004",
+          "system": "http://foo.com",
+          "version": "http://foo.com/version/1"
         }
       ]
     }

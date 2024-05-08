@@ -80,7 +80,7 @@ function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url'
 
   const optionCallback = typeof options.svsCodeSystemCallback === 'function' ? options.svsCodeSystemCallback : null;
   // Loop over the codes and build the JSON.
-  const codeList = [];
+  let codeList = [];
   for (let concept in conceptList) {
     let system = conceptList[concept]['$']['codeSystem'];
     const code = conceptList[concept]['$']['code'];
@@ -109,19 +109,12 @@ function parseVSACXML(xmlString, vsDB = {}, options = { svsCodeSystemType: 'url'
 
     const codeToAdd = { code, system, version };
 
-    if (optionCallback) {
-      const additionalCodes = optionCallback(codeToAdd);
-
-      if (additionalCodes && Array.isArray(additionalCodes)) {
-        additionalCodes.forEach(additionalCode => {
-          // TODO: handle systemOid here?
-          codeList.push(additionalCode);
-        });
-      }
-    }
-
-
     codeList.push(codeToAdd);
+  }
+
+  // If there is a callback included
+  if (optionCallback) {
+    codeList = optionCallback(codeList);
   }
 
   // Format according to the current valueset db JSON.
