@@ -22,6 +22,9 @@ const SYSTOLIC_OID_VS_DB = fixVSDBFixture(
 const SYSTOLIC_OID_URI_VS_DB = fixVSDBFixture(
   require('./fixtures/2.16.840.1.113883.3.526.3.1032-oid-uri-vsdb.json')
 );
+const TEST = fixVSDBFixture(
+  require('./fixtures/2.16.840.1.113883.3.600.2390-additional-codes-vsdb')
+);
 
 describe('SVS', () => {
   let tmpCache;
@@ -301,6 +304,46 @@ describe('SVS', () => {
         error.should.be.an('error');
         error.message.should.equal('404');
       }
+    });
+
+    it('should merge value sets into the value set database, adding additional codes', async () => {
+      nock('https://vsac.nlm.nih.gov')
+        .get('/vsac/svs/RetrieveValueSet')
+        .basicAuth({ user: 'apikey', pass: 'testkey' })
+        .query({
+          id: '2.16.840.1.113883.3.600.2390'
+        })
+        .replyWithFile(200, path.join(__dirname, 'fixtures', '2.16.840.1.113883.3.600.2390.xml'));
+
+      const vsDB = {};
+      await Promise.all([
+        svs.downloadValueSet(
+          'testkey',
+          '2.16.840.1.113883.3.600.2390',
+          undefined,
+          tmpCache,
+          vsDB,
+          true,
+          {
+            //  { code, system, version }
+            svsCodeSystemCallback: (codes) => {
+              const addCodes = [];
+              codes.forEach(code => {
+                if (code.code === '160604004' && code.system === 'http://snomed.info/sct') {
+                  addCodes.push({ code: code.code, system: 'http://foo.com', version: 'http://foo.com/version/1' });
+                }      
+              });
+
+              return codes.concat(addCodes);
+            }
+          }
+        )
+      ]);
+      // Should add the results to the VS DB
+      Object.keys(vsDB).should.have.length(1);
+      vsDB['2.16.840.1.113883.3.600.2390'].should.eql(
+        TEST['2.16.840.1.113883.3.600.2390']
+      );
     });
   });
 });
